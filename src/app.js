@@ -1,9 +1,14 @@
+// Loads .env before this file reads process.env while configuring middleware.
+import { configDotenv } from "dotenv";
 // Express creates the web server and handles HTTP requests and responses.
 import express from "express";
 // Reads cookies sent by browsers and makes them available on req.cookies.
 import cookieParser from "cookie-parser";
 // Controls which browser-based frontends may call this API.
 import cors from "cors";
+
+// Reads values from the .env file before CORS uses CORS_ORIGIN below.
+configDotenv();
 
 // Creates the Express application object.
 const app = express();
