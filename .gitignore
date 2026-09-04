@@ -71,6 +71,7 @@ web_modules/
 
 # dotenv environment variables file
 .env
+BEGINNER_GUIDE.md
 .env.test
 .env.production
 
@@ -118,3 +119,4 @@ dist
 .pnp.*
 
 # End of https://mrkandreev.name/snippets/gitignore-generator/#Node
+.env
