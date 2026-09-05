@@ -1,8 +1,5 @@
-// Converts an async route handler into Express middleware that forwards failures.
 const asyncHandler = (requestHandler) => {
-    // Return the wrapper: Express needs this function to receive req, res, and next.
     return (req, res, next) => {
-        // Promise.resolve also handles handlers that return a normal value.
         Promise.resolve(requestHandler(req, res, next)).catch((error) => next(error))
     }
 }
