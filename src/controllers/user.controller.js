@@ -4,7 +4,7 @@ import { User } from "../models/user.model.js";
 import { uploadCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/apiResponse.js";
 import jwt from "jsonwebtoken";
-import Subscriber from "../models/subscription.model.js";
+import Subscription from "../models/subscription.model.js";
 
 const generateAccessAndRefreshTokens = async (userId) => {
   try {
@@ -156,7 +156,7 @@ const logoutUser = asyncHandler(async (req, res) => {
       },
     },
     {
-      new: true,
+      returnDocument: "after",
     }
   );
 
@@ -185,8 +185,12 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       process.env.REFRESH_TOKEN_SECRET
     );
 
-    const user = await User.findById(decodedToken?._id);
+    if(!incomingRefreshToken){
+      throw new ApiError(401,"refresh token error")
+    }
 
+    const user = await User.findById(decodedToken?._id);
+ 
     if (!user) {
       throw new ApiError(401, "invalid refresh token");
     }
@@ -200,7 +204,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       secure: true,
     };
 
-    const { accessToken, newRefreshToken } =
+    const { accessToken, refreshToken: newRefreshToken } =
       await generateAccessAndRefreshTokens(user._id);
 
     return res
@@ -218,6 +222,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
         )
       );
   } catch (error) {
+    console.log(error)
     throw new ApiError(401, "invalid refresh token");
   }
 });
@@ -262,7 +267,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
         email
       }
     },
-    {new: true}
+    {returnDocument: "after"}
   ).select("-password");
 
   return res
@@ -291,7 +296,7 @@ const updataUserAvatar = asyncHandler( async (req, res) => {
         avatar: avatar?.url
       }
     },
-    {new: true}
+    {returnDocument: "after"}
   ).select("-password");
 
   return res
@@ -319,7 +324,7 @@ const updataUserCoverImage = asyncHandler( async (req, res) => {
         coverImage: coverImage.url
       }
     },
-    {new: true}
+    {returnDocument: "after"}
   ).select("-password");
 
   return res
