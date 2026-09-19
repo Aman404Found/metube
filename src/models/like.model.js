@@ -1,19 +1,24 @@
-import mongoose from "mongoose";
+import mongoose, {Schema} from "mongoose";
 
-const likeSchema = new mongoose.Schema({
-    comment: {
-        type: mongoose.Types.ObjectId,
-        ref: "Comment"
-    },
+
+const likeSchema = new Schema({
     video: {
-        type: mongoose.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: "Video"
     },
-    likeBy: {
-        type: mongoose.Types.ObjectId,
+    comment: {
+        type: Schema.Types.ObjectId,
+        ref: "Comment"
+    },
+    tweet: {
+        type: Schema.Types.ObjectId,
+        ref: "Tweet"
+    },
+    likedBy: {
+        type: Schema.Types.ObjectId,
         ref: "User"
-    }
-},
-{timestamps: true});
-//tweet
-export const Like = mongoose.model("Like", likeSchema);
+    },
+    
+}, {timestamps: true})
+
+export const Like = mongoose.model("Like", likeSchema)
