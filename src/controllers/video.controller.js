@@ -8,11 +8,98 @@ import {uploadCloudinary} from "../utils/cloudinary.js"
 
 
 const getAllVideos = asyncHandler(async (req, res) => {
-    const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query
-    //TODO: get all videos based on query, sort, pagination
-    
-    
-})
+    const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
+
+    const pipeline = [];
+    const match = {};
+
+    if (query?.trim()) {
+        match.$or = [
+            {
+                title: {
+                    $regex: query.trim(),
+                    $options: "i",
+                },
+            },
+            {
+                description: {
+                    $regex: query.trim(),
+                    $options: "i",
+                },
+            },
+        ];
+    }
+
+    if (userId) {
+        if (!isValidObjectId(userId)) {
+            throw new ApiError(400, "Invalid userId");
+        }
+        match.owner = new mongoose.Types.ObjectId(userId);
+    }
+
+    if (req.query.isPublished !== undefined) {
+        match.isPublished = req.query.isPublished === "true";
+    } else {
+        match.isPublished = true;
+    }
+
+    pipeline.push({
+        $match: match,
+    });
+
+    pipeline.push(
+        {
+            $lookup: {
+                from: "users",
+                localField: "owner",
+                foreignField: "_id",
+                as: "owner",
+                pipeline: [
+                    {
+                        $project: {
+                            fullName: 1,
+                            username: 1,
+                            avatar: 1,
+                        },
+                    },
+                ],
+            },
+        },
+        {
+            $addFields: {
+                owner: {
+                    $first: "$owner",
+                },
+            },
+        }
+    );
+
+    const sortCriteria = {};
+    if (sortBy) {
+        sortCriteria[sortBy] = sortType?.toLowerCase() === "asc" ? 1 : -1;
+    } else {
+        sortCriteria["createdAt"] = -1;
+    }
+
+    pipeline.push({
+        $sort: sortCriteria,
+    });
+
+
+    const options = {
+        page: Math.max(1, parseInt(page, 10) || 1),
+        limit: Math.max(1, parseInt(limit, 10) || 10),
+    };
+
+    const videos = await Video.aggregatePaginate(
+        Video.aggregate(pipeline),
+        options
+    );
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, videos, "Videos fetched successfully"));
+});
 
 const publishVideo = asyncHandler(async (req, res) => {
     const { title, description} = req.body
