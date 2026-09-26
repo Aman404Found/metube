@@ -18,6 +18,10 @@ const uploadCloudinary = async (filePath) => {
             resource_type: "auto"
         })
 
+        if(fs.existsSync(filePath)){
+            fs.unlinkSync(filePath);
+        }
+
         return response; 
 
     } catch (error) {
