@@ -276,7 +276,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
 })
 
 //todo: old image delete
-const updataUserAvatar = asyncHandler( async (req, res) => {
+const updateUserAvatar = asyncHandler( async (req, res) => {
   const avatarLocalPath = req.file?.path;
 
   if(!avatarLocalPath){
@@ -304,7 +304,7 @@ const updataUserAvatar = asyncHandler( async (req, res) => {
   .json(new ApiResponse(200, {}, "avatar image updated successfully."))
 })
 
-const updataUserCoverImage = asyncHandler( async (req, res) => {
+const updateUserCoverImage = asyncHandler( async (req, res) => {
   const coverImageLocalPath = req.file?.path;
 
   if(!coverImageLocalPath){
